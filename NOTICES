@@ -1,0 +1,8 @@
+The code in the internal/ directory is copied, with minor modifications from
+prometheus and is Copyright The Prometheus Authors
+
+The code in the hack/ directory is copied with modification from the Kubernetes 
+code-generator project and is Copyright The Kubernetes Authors.
+
+prom-config-controller is Copyright 2019 Qubit Digital Ltd  All Rights Reserved.
+

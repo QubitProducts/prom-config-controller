@@ -1,0 +1,20 @@
+apiVersion: config.prometheus.io/v1beta1
+kind: RuleGroup
+metadata:
+  name: global
+  namespace: default
+spec:
+  rules:
+  - alert: MuteOutOfHours
+    annotations:
+      description: An alert that fires out of working hours, to mute other alerts
+      title: An alert that fires out of working hours, to mute other alerts
+    expr: (day_of_week() == 0 or day_of_week() == 6) or ((day_of_week() >= 1 and day_of_week()
+      <= 5) and (hour() < 8 or hour() > 17))
+    for: 1m
+    labels:
+      muter: not-ooh
+      severity: none
+  - expr: label_replace(rate(container_cpu_user_seconds_total{job="cadvisor"}[1m]),
+      "job", "$1", "container_name", "(.+)")
+    record: task:container_cpu_user_seconds:rate1m

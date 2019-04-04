@@ -1,0 +1,42 @@
+apiVersion: config.prometheus.io/v1beta1
+kind: Scrape
+metadata:
+  name: someservers
+  namespace: default
+spec: |
+  job_name: myserver
+  metrics_path: /metrics
+  scheme: http
+  gce_sd_configs:
+  - project: myproject
+    zone: europe-west1-b
+    filter: name eq myservice.*
+    refresh_interval: 1m
+    port: 1234
+    tag_separator: ','
+  - project: myproject
+    zone: europe-west1-d
+    filter: name eq myservice.*
+    refresh_interval: 1m
+    port: 1234
+    tag_separator: ','
+  relabel_configs:
+  - source_labels: [__meta_gce_instance_name]
+    separator: ;
+    regex: (.*)
+    target_label: instance
+    replacement: $1
+    action: replace
+  - source_labels: [__meta_gce_tags]
+    separator: ;
+    regex: (.*)
+    target_label: gce_tags
+    replacement: $1
+    action: replace
+  - source_labels: [__meta_gce_zone]
+    separator: ;
+    regex: (.*)/([^/]+)$
+    target_label: gce_zone
+    replacement: ${2}
+    action: replace
+

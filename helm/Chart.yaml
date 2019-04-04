@@ -1,0 +1,7 @@
+name: prom-config-controller
+version: 0.0.1
+description: Add CRDs for prom-config-controller
+keywords:
+  - prometheus
+home: http://github.com/QubitProducts/prom-config-controller
+engine: gotpl
