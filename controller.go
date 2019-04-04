@@ -33,7 +33,6 @@ import (
 	"github.com/pkg/errors"
 	"github.com/prometheus/common/model"
 	"github.com/prometheus/prometheus/pkg/rulefmt"
-	container "google.golang.org/api/container/v1"
 	yaml "gopkg.in/yaml.v2"
 
 	corev1 "k8s.io/api/core/v1"
@@ -383,7 +382,7 @@ func (c *Controller) syncConfigHandler() (bool, error) {
 	var configStr string
 	if c.ConfigTemplate != nil {
 		templateData := struct {
-			Clusters []*container.Cluster
+			Clusters []*cluster
 		}{}
 		var err error
 		if c.clusterLister != nil {

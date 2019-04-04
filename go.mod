@@ -1,8 +1,9 @@
 module github.com/QubitProducts/prom-config-controller
 
 require (
+	github.com/Masterminds/goutils v1.1.0 // indirect
 	github.com/Masterminds/semver v1.4.2 // indirect
-	github.com/Masterminds/sprig v2.15.0+incompatible
+	github.com/Masterminds/sprig v2.18.0+incompatible
 	github.com/OneOfOne/xxhash v1.2.2 // indirect
 	github.com/aokoli/goutils v1.0.1 // indirect
 	github.com/aws/aws-sdk-go v0.0.0-20180507225419-00862f899353
@@ -37,6 +38,7 @@ require (
 	github.com/smartystreets/goconvey v0.0.0-20180222194500-ef6db91d284a // indirect
 	github.com/spaolacci/murmur3 v0.0.0-20180118202830-f09979ecbc72 // indirect
 	github.com/spf13/pflag v1.0.0 // indirect
+	golang.org/x/oauth2 v0.0.0-20190402181905-9f3314589c9a // indirect
 	golang.org/x/sync v0.0.0-20190227155943-e225da77a7e6
 	golang.org/x/time v0.0.0-20170424234030-8be79e1e0910 // indirect
 	gonum.org/v1/gonum v0.0.0-20190314102406-9182d211c6c2 // indirect

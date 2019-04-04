@@ -29,13 +29,18 @@ import (
 	"net/http"
 	"os"
 	"path"
+	"path/filepath"
 	"text/template"
 	"time"
 
 	"github.com/Masterminds/sprig"
 	"github.com/golang/glog"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"golang.org/x/oauth2/google"
 	"golang.org/x/sync/errgroup"
+
+	gke "cloud.google.com/go/container/apiv1"
+
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/labels"
 
@@ -85,6 +90,7 @@ var (
 	reloadRetries     int
 
 	gcpProject string
+	gcpKeysDir string
 )
 
 func init() {
@@ -105,9 +111,9 @@ func init() {
 	flag.StringVar(&configFile, "config.file", "config.yaml", "")
 	flag.StringVar(&serviceNS, "service.namespace", "infra", "The namespace that the controllers service is registered in")
 	flag.StringVar(&serviceName, "service.name", "prom-config-controller", "The controllers service name")
-	flag.StringVar(&tlsKey, "tls.key", "/config/tls.key", "Path to TLS key file")
-	flag.StringVar(&tlsCert, "tls.cert", "/config/tls.cert", "Path to TLS public cert file")
-	flag.StringVar(&tlsCA, "tls.ca", "/config/tls.cacert", "Path to TLS CA file")
+	flag.StringVar(&tlsKey, "tls.key", "tls.key", "Path to TLS key file")
+	flag.StringVar(&tlsCert, "tls.cert", "tls.crt", "Path to TLS public cert file")
+	flag.StringVar(&tlsCA, "tls.ca", "ca.crt", "Path to TLS CA file")
 	flag.StringVar(&reloadScheme, "reload.scheme", "http", "On config change, Reload")
 	flag.StringVar(&reloadMethod, "reload.method", "POST", "On config change, Reload")
 	flag.StringVar(&reloadHost, "reload.host", "localhost:9090", "host:port for reload, port is used with endpoint mathcing, if host is non-blank, a request will be made direct to the given port.")
@@ -118,6 +124,7 @@ func init() {
 	flag.IntVar(&reloadRetries, "reload.retries", 4, "number of retries when reloading")
 
 	flag.StringVar(&gcpProject, "gcpProject", "", "Google Cloud project to scan for GKE clusters")
+	flag.StringVar(&gcpKeysDir, "gcpKeysDir", ".", "directory to write client keys to")
 }
 
 type filteredLog struct {
@@ -218,8 +225,34 @@ func main() {
 		ConfigFile:       configFile,
 	}
 
+	tokenFile := "/var/run/secrets/kubernetes.io/serviceaccount/token"
 	var cl clusterLister
 	if gcpProject != "" {
+		gkecm, err := gke.NewClusterManagerClient(context.Background())
+		if err != nil {
+			glog.Fatalf("could not build GKE client, %s", err.Error())
+		}
+
+		tokenFile = filepath.Join(gcpKeysDir, "token")
+		go func() {
+			tokenGrace := 5 * time.Minute
+			creds, err := google.FindDefaultCredentials(context.Background())
+			if err != nil {
+				glog.Fatalf("could not get google token source", err.Error())
+			}
+			for {
+				tok, err := creds.TokenSource.Token()
+				if err != nil {
+					glog.Fatalf("could not get google token source", err.Error())
+				}
+				ioutil.WriteFile(tokenFile, []byte(tok.AccessToken), 0600)
+				if tok.Expiry.IsZero() {
+					return
+				}
+				time.Sleep(time.Until(tok.Expiry) - tokenGrace)
+			}
+		}()
+		cl = listGKEClusters(gkecm, gcpProject, gcpKeysDir, tokenFile)
 	}
 
 	controller := NewController(
