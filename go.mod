@@ -1,6 +1,7 @@
 module github.com/QubitProducts/prom-config-controller
 
 require (
+	cloud.google.com/go v0.34.0
 	github.com/Masterminds/goutils v1.1.0 // indirect
 	github.com/Masterminds/semver v1.4.2 // indirect
 	github.com/Masterminds/sprig v2.18.0+incompatible
@@ -15,6 +16,7 @@ require (
 	github.com/google/btree v0.0.0-20180124185431-e89373fe6b4a // indirect
 	github.com/google/gofuzz v0.0.0-20170612174753-24818f796faf // indirect
 	github.com/google/uuid v1.0.0 // indirect
+	github.com/googleapis/gax-go v2.0.2+incompatible // indirect
 	github.com/googleapis/gnostic v0.0.0-20180520015035-48a0ecefe2e4 // indirect
 	github.com/gopherjs/gopherjs v0.0.0-20180825215210-0210a2f0f73c // indirect
 	github.com/gregjones/httpcache v0.0.0-20180305231024-9cad4c3443a7 // indirect
@@ -38,11 +40,12 @@ require (
 	github.com/smartystreets/goconvey v0.0.0-20180222194500-ef6db91d284a // indirect
 	github.com/spaolacci/murmur3 v0.0.0-20180118202830-f09979ecbc72 // indirect
 	github.com/spf13/pflag v1.0.0 // indirect
-	golang.org/x/oauth2 v0.0.0-20190402181905-9f3314589c9a // indirect
+	golang.org/x/oauth2 v0.0.0-20190402181905-9f3314589c9a
 	golang.org/x/sync v0.0.0-20190227155943-e225da77a7e6
 	golang.org/x/time v0.0.0-20170424234030-8be79e1e0910 // indirect
 	gonum.org/v1/gonum v0.0.0-20190314102406-9182d211c6c2 // indirect
 	google.golang.org/api v0.2.0
+	google.golang.org/genproto v0.0.0-20190307195333-5fe7a883aa19
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.2.2
 	k8s.io/api v0.0.0-20180913155108-f456898a08e4

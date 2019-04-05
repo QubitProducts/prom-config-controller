@@ -236,7 +236,7 @@ func main() {
 		tokenFile = filepath.Join(gcpKeysDir, "token")
 		go func() {
 			tokenGrace := 5 * time.Minute
-			creds, err := google.FindDefaultCredentials(context.Background())
+			creds, err := google.FindDefaultCredentials(context.Background(), "https://www.googleapis.com/auth/cloud-platform")
 			if err != nil {
 				glog.Fatalf("could not get google token source", err.Error())
 			}
