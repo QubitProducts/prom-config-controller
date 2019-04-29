@@ -235,16 +235,18 @@ func main() {
 
 		tokenFile = filepath.Join(gcpKeysDir, "token")
 		go func() {
-			tokenGrace := 5 * time.Minute
-			creds, err := google.FindDefaultCredentials(context.Background(), "https://www.googleapis.com/auth/cloud-platform")
-			if err != nil {
-				glog.Fatalf("could not get google token source", err.Error())
-			}
 			for {
-				tok, err := creds.TokenSource.Token()
+				tokenGrace := 1 * time.Minute
+				ts, err := google.DefaultTokenSource(context.Background(), "https://www.googleapis.com/auth/cloud-platform")
 				if err != nil {
 					glog.Fatalf("could not get google token source", err.Error())
 				}
+
+				tok, err := ts.Token()
+				if err != nil {
+					glog.Fatalf("could not get google token source", err.Error())
+				}
+
 				ioutil.WriteFile(tokenFile, []byte(tok.AccessToken), 0600)
 				if tok.Expiry.IsZero() {
 					glog.Infof("token has not set expiry, wont refresh")
