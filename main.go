@@ -247,9 +247,13 @@ func main() {
 				}
 				ioutil.WriteFile(tokenFile, []byte(tok.AccessToken), 0600)
 				if tok.Expiry.IsZero() {
+					glog.Infof("token has not set expiry, wont refresh")
 					return
 				}
-				time.Sleep(time.Until(tok.Expiry) - tokenGrace)
+				until := time.Until(tok.Expiry) - tokenGrace
+				glog.Infof("token refresh sleeping for %v until %v before %v", until, tokenGrace, tok.Expiry)
+
+				time.Sleep(until)
 			}
 		}()
 		cl = listGKEClusters(gkecm, gcpProject, gcpKeysDir, tokenFile)
