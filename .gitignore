@@ -3,3 +3,4 @@ vendor
 *.cacrt
 *.key
 *.crt
+/hack/.bin
