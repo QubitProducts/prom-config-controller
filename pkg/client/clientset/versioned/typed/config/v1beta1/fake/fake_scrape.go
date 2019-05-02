@@ -1,5 +1,5 @@
 /*
-Copyright 2018 The Kubernetes sample-controller Authors.
+Copyright 2019 The Kubernetes sample-controller Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -62,7 +62,7 @@ func (c *FakeScrapes) List(opts v1.ListOptions) (result *v1beta1.ScrapeList, err
 	if label == nil {
 		label = labels.Everything()
 	}
-	list := &v1beta1.ScrapeList{}
+	list := &v1beta1.ScrapeList{ListMeta: obj.(*v1beta1.ScrapeList).ListMeta}
 	for _, item := range obj.(*v1beta1.ScrapeList).Items {
 		if label.Matches(labels.Set(item.Labels)) {
 			list.Items = append(list.Items, item)
@@ -119,7 +119,7 @@ func (c *FakeScrapes) DeleteCollection(options *v1.DeleteOptions, listOptions v1
 // Patch applies the patch and returns the patched scrape.
 func (c *FakeScrapes) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1beta1.Scrape, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(scrapesResource, c.ns, name, data, subresources...), &v1beta1.Scrape{})
+		Invokes(testing.NewPatchSubresourceAction(scrapesResource, c.ns, name, pt, data, subresources...), &v1beta1.Scrape{})
 
 	if obj == nil {
 		return nil, err

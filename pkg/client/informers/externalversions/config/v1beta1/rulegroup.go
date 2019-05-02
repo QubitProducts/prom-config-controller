@@ -1,5 +1,5 @@
 /*
-Copyright 2018 The Kubernetes sample-controller Authors.
+Copyright 2019 The Kubernetes sample-controller Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -21,7 +21,7 @@ package v1beta1
 import (
 	time "time"
 
-	config_v1beta1 "github.com/QubitProducts/prom-config-controller/pkg/apis/config/v1beta1"
+	configv1beta1 "github.com/QubitProducts/prom-config-controller/pkg/apis/config/v1beta1"
 	versioned "github.com/QubitProducts/prom-config-controller/pkg/client/clientset/versioned"
 	internalinterfaces "github.com/QubitProducts/prom-config-controller/pkg/client/informers/externalversions/internalinterfaces"
 	v1beta1 "github.com/QubitProducts/prom-config-controller/pkg/client/listers/config/v1beta1"
@@ -70,7 +70,7 @@ func NewFilteredRuleGroupInformer(client versioned.Interface, namespace string, 
 				return client.ConfigV1beta1().RuleGroups(namespace).Watch(options)
 			},
 		},
-		&config_v1beta1.RuleGroup{},
+		&configv1beta1.RuleGroup{},
 		resyncPeriod,
 		indexers,
 	)
@@ -81,7 +81,7 @@ func (f *ruleGroupInformer) defaultInformer(client versioned.Interface, resyncPe
 }
 
 func (f *ruleGroupInformer) Informer() cache.SharedIndexInformer {
-	return f.factory.InformerFor(&config_v1beta1.RuleGroup{}, f.defaultInformer)
+	return f.factory.InformerFor(&configv1beta1.RuleGroup{}, f.defaultInformer)
 }
 
 func (f *ruleGroupInformer) Lister() v1beta1.RuleGroupLister {

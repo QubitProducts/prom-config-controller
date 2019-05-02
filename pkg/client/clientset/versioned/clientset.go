@@ -1,5 +1,5 @@
 /*
-Copyright 2018 The Kubernetes sample-controller Authors.
+Copyright 2019 The Kubernetes sample-controller Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,7 +19,6 @@ limitations under the License.
 package versioned
 
 import (
-	glog "github.com/golang/glog"
 	configv1beta1 "github.com/QubitProducts/prom-config-controller/pkg/client/clientset/versioned/typed/config/v1beta1"
 	discovery "k8s.io/client-go/discovery"
 	rest "k8s.io/client-go/rest"
@@ -29,8 +28,6 @@ import (
 type Interface interface {
 	Discovery() discovery.DiscoveryInterface
 	ConfigV1beta1() configv1beta1.ConfigV1beta1Interface
-	// Deprecated: please explicitly pick a version if possible.
-	Config() configv1beta1.ConfigV1beta1Interface
 }
 
 // Clientset contains the clients for groups. Each group has exactly one
@@ -42,12 +39,6 @@ type Clientset struct {
 
 // ConfigV1beta1 retrieves the ConfigV1beta1Client
 func (c *Clientset) ConfigV1beta1() configv1beta1.ConfigV1beta1Interface {
-	return c.configV1beta1
-}
-
-// Deprecated: Config retrieves the default version of ConfigClient.
-// Please explicitly pick a version.
-func (c *Clientset) Config() configv1beta1.ConfigV1beta1Interface {
 	return c.configV1beta1
 }
 
@@ -74,7 +65,6 @@ func NewForConfig(c *rest.Config) (*Clientset, error) {
 
 	cs.DiscoveryClient, err = discovery.NewDiscoveryClientForConfig(&configShallowCopy)
 	if err != nil {
-		glog.Errorf("failed to create the DiscoveryClient: %v", err)
 		return nil, err
 	}
 	return &cs, nil

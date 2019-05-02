@@ -1,5 +1,5 @@
 /*
-Copyright 2018 The Kubernetes sample-controller Authors.
+Copyright 2019 The Kubernetes sample-controller Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -62,7 +62,7 @@ func (c *FakeRuleGroups) List(opts v1.ListOptions) (result *v1beta1.RuleGroupLis
 	if label == nil {
 		label = labels.Everything()
 	}
-	list := &v1beta1.RuleGroupList{}
+	list := &v1beta1.RuleGroupList{ListMeta: obj.(*v1beta1.RuleGroupList).ListMeta}
 	for _, item := range obj.(*v1beta1.RuleGroupList).Items {
 		if label.Matches(labels.Set(item.Labels)) {
 			list.Items = append(list.Items, item)
@@ -119,7 +119,7 @@ func (c *FakeRuleGroups) DeleteCollection(options *v1.DeleteOptions, listOptions
 // Patch applies the patch and returns the patched ruleGroup.
 func (c *FakeRuleGroups) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1beta1.RuleGroup, err error) {
 	obj, err := c.Fake.
-		Invokes(testing.NewPatchSubresourceAction(rulegroupsResource, c.ns, name, data, subresources...), &v1beta1.RuleGroup{})
+		Invokes(testing.NewPatchSubresourceAction(rulegroupsResource, c.ns, name, pt, data, subresources...), &v1beta1.RuleGroup{})
 
 	if obj == nil {
 		return nil, err
