@@ -431,7 +431,7 @@ func (c *Controller) syncConfigHandler() (bool, error) {
 
 	sort.Strings(scrapeKeys)
 	var scrapeList []*promconfig.ScrapeConfig
-	for k := range scrapes {
+	for _, k := range scrapeKeys {
 		scrapeList = append(scrapeList, scrapes[k])
 	}
 

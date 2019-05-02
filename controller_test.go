@@ -17,6 +17,7 @@ limitations under the License.
 package main
 
 import (
+	"context"
 	"reflect"
 	"testing"
 	"time"
@@ -208,7 +209,8 @@ func (f *fixture) newController() (*Controller, informers.SharedInformerFactory,
 		f.kubeclient,
 		f.client,
 		i,
-		&reloader)
+		&reloader,
+		func(ctx context.Context) ([]*cluster, error) { return nil, nil })
 
 	c.rulesSynced = alwaysReady
 	c.recorder = &record.FakeRecorder{}

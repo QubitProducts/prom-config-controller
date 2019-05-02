@@ -239,12 +239,12 @@ func main() {
 				tokenGrace := 1 * time.Minute
 				ts, err := google.DefaultTokenSource(context.Background(), "https://www.googleapis.com/auth/cloud-platform")
 				if err != nil {
-					glog.Fatalf("could not get google token source", err.Error())
+					glog.Fatalf("could not get google token source, %v", err.Error())
 				}
 
 				tok, err := ts.Token()
 				if err != nil {
-					glog.Fatalf("could not get google token source", err.Error())
+					glog.Fatalf("could not get google token source, %v", err.Error())
 				}
 
 				ioutil.WriteFile(tokenFile, []byte(tok.AccessToken), 0600)

@@ -46,7 +46,7 @@ func listGKEClusters(c *gke.ClusterManagerClient, project string, tlsDir string,
 				crtFile := filepath.Join(tlsDir, c.Name+".crt")
 				bs, err := base64.StdEncoding.DecodeString(c.MasterAuth.ClientCertificate)
 				if err != nil {
-					glog.Errorf("failed decoding %s cert", c.Name, err)
+					glog.Errorf("failed decoding %s cert, %v", c.Name, err)
 				}
 				err = ioutil.WriteFile(crtFile, bs, 0600)
 				if err != nil {
