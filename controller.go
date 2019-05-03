@@ -148,8 +148,8 @@ func NewController(
 		rulesSynced:      rulesInformer.Informer().HasSynced,
 		scrapesLister:    scrapesInformer.Lister(),
 		scrapesSynced:    scrapesInformer.Informer().HasSynced,
-		rulesWorkqueue:   workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "rules"),
-		scrapesWorkqueue: workqueue.NewNamedRateLimitingQueue(workqueue.DefaultControllerRateLimiter(), "scrapes"),
+		rulesWorkqueue:   workqueue.NewNamedRateLimitingQueue(workqueue.DefaultItemBasedRateLimiter(), "rules"),
+		scrapesWorkqueue: workqueue.NewNamedRateLimitingQueue(workqueue.DefaultItemBasedRateLimiter(), "scrapes"),
 		recorder:         recorder,
 		clusterLister:    clusterLister,
 	}
