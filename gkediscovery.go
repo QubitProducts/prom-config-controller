@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"io/ioutil"
 	"path/filepath"
+	"sort"
 
 	gke "cloud.google.com/go/container/apiv1"
 	"github.com/golang/glog"
@@ -19,6 +20,17 @@ type cluster struct {
 	CAFile          string
 	BearerTokenFile string
 	gkepb.Cluster
+}
+
+type byEndpoint []*cluster
+
+func (a byEndpoint) Len() int      { return len(a) }
+func (a byEndpoint) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
+func (a byEndpoint) Less(i, j int) bool {
+	if a[i].Endpoint < a[j].Endpoint {
+		return true
+	}
+	return false
 }
 
 type clusterLister func(ctx context.Context) ([]*cluster, error)
@@ -83,6 +95,8 @@ func listGKEClusters(c *gke.ClusterManagerClient, project string, tlsDir string,
 
 			cls = append(cls, newcluster)
 		}
+
+		sort.Sort(byEndpoint(cls))
 
 		return cls, nil
 	}
