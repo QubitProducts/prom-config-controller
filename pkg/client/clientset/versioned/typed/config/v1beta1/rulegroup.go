@@ -39,6 +39,7 @@ type RuleGroupsGetter interface {
 type RuleGroupInterface interface {
 	Create(*v1beta1.RuleGroup) (*v1beta1.RuleGroup, error)
 	Update(*v1beta1.RuleGroup) (*v1beta1.RuleGroup, error)
+	UpdateStatus(*v1beta1.RuleGroup) (*v1beta1.RuleGroup, error)
 	Delete(name string, options *v1.DeleteOptions) error
 	DeleteCollection(options *v1.DeleteOptions, listOptions v1.ListOptions) error
 	Get(name string, options v1.GetOptions) (*v1beta1.RuleGroup, error)
@@ -126,6 +127,22 @@ func (c *ruleGroups) Update(ruleGroup *v1beta1.RuleGroup) (result *v1beta1.RuleG
 		Namespace(c.ns).
 		Resource("rulegroups").
 		Name(ruleGroup.Name).
+		Body(ruleGroup).
+		Do().
+		Into(result)
+	return
+}
+
+// UpdateStatus was generated because the type contains a Status member.
+// Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
+
+func (c *ruleGroups) UpdateStatus(ruleGroup *v1beta1.RuleGroup) (result *v1beta1.RuleGroup, err error) {
+	result = &v1beta1.RuleGroup{}
+	err = c.client.Put().
+		Namespace(c.ns).
+		Resource("rulegroups").
+		Name(ruleGroup.Name).
+		SubResource("status").
 		Body(ruleGroup).
 		Do().
 		Into(result)

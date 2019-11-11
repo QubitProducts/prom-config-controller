@@ -15,7 +15,6 @@ type Rule struct {
 }
 
 // +genclient
-// +genclient:noStatus
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
 // RuleGroup
@@ -24,7 +23,7 @@ type RuleGroup struct {
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
 	Spec   RuleGroupSpec   `json:"spec"`
-	Status RuleGroupStatus `json:"status"`
+	Status RuleGroupStatus `json:"status,omitempty"`
 }
 
 // RuleGroupSpec is the spec for a Foo resource
@@ -35,7 +34,7 @@ type RuleGroupSpec struct {
 
 // RuleGroupStatus is the status for a Foo resource
 type RuleGroupStatus struct {
-	Errors []string
+	Errors []string `json:"errors,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

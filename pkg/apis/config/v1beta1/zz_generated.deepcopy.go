@@ -86,7 +86,7 @@ func (in *RuleGroup) DeepCopyObject() runtime.Object {
 func (in *RuleGroupList) DeepCopyInto(out *RuleGroupList) {
 	*out = *in
 	out.TypeMeta = in.TypeMeta
-	out.ListMeta = in.ListMeta
+	in.ListMeta.DeepCopyInto(&out.ListMeta)
 	if in.Items != nil {
 		in, out := &in.Items, &out.Items
 		*out = make([]RuleGroup, len(*in))
@@ -189,7 +189,7 @@ func (in *Scrape) DeepCopyObject() runtime.Object {
 func (in *ScrapeList) DeepCopyInto(out *ScrapeList) {
 	*out = *in
 	out.TypeMeta = in.TypeMeta
-	out.ListMeta = in.ListMeta
+	in.ListMeta.DeepCopyInto(&out.ListMeta)
 	if in.Items != nil {
 		in, out := &in.Items, &out.Items
 		*out = make([]Scrape, len(*in))

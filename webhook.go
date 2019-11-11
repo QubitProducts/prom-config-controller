@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/golang/glog"
 	configV1beta1 "github.com/QubitProducts/prom-config-controller/pkg/apis/config/v1beta1"
+	"github.com/golang/glog"
 	"k8s.io/api/admission/v1beta1"
 	regv1beta1 "k8s.io/api/admissionregistration/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -185,7 +185,7 @@ func (c *Controller) selfRegistration() error {
 		ObjectMeta: metav1.ObjectMeta{
 			Name: webhookName,
 		},
-		Webhooks: []regv1beta1.Webhook{
+		Webhooks: []regv1beta1.ValidatingWebhook{
 			{
 				Name: configV1beta1.SchemeGroupVersion.Group,
 				Rules: []regv1beta1.RuleWithOperations{

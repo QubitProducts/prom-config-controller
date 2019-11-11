@@ -100,6 +100,18 @@ func (c *FakeRuleGroups) Update(ruleGroup *v1beta1.RuleGroup) (result *v1beta1.R
 	return obj.(*v1beta1.RuleGroup), err
 }
 
+// UpdateStatus was generated because the type contains a Status member.
+// Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
+func (c *FakeRuleGroups) UpdateStatus(ruleGroup *v1beta1.RuleGroup) (*v1beta1.RuleGroup, error) {
+	obj, err := c.Fake.
+		Invokes(testing.NewUpdateSubresourceAction(rulegroupsResource, "status", c.ns, ruleGroup), &v1beta1.RuleGroup{})
+
+	if obj == nil {
+		return nil, err
+	}
+	return obj.(*v1beta1.RuleGroup), err
+}
+
 // Delete takes name of the ruleGroup and deletes it. Returns an error if one occurs.
 func (c *FakeRuleGroups) Delete(name string, options *v1.DeleteOptions) error {
 	_, err := c.Fake.
