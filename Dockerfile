@@ -1,8 +1,9 @@
-FROM golang:1.12-alpine AS builder
+FROM golang:1.13-alpine AS builder
 RUN apk add git
 ARG SRC_DIR=/src
 ADD . $SRC_DIR
 WORKDIR $SRC_DIR
+ENV GOPRIVATE=github.com/prometheus/prometheus
 RUN go build .
 
 FROM alpine:latest

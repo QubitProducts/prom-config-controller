@@ -5,23 +5,16 @@ require (
 	github.com/Masterminds/goutils v1.1.0 // indirect
 	github.com/Masterminds/semver v1.4.2 // indirect
 	github.com/Masterminds/sprig v2.18.0+incompatible
-	github.com/aws/aws-sdk-go v1.19.20
-	github.com/beorn7/perks v1.0.0 // indirect
+	github.com/aws/aws-sdk-go v1.23.12
 	github.com/cloudflare/backoff v0.0.0-20161212185259-647f3cdfc87a
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b
 	github.com/golang/groupcache v0.0.0-20191027212112-611e8accdfc9 // indirect
-	github.com/google/go-cmp v0.3.1 // indirect
-	github.com/googleapis/gnostic v0.2.0 // indirect
-	github.com/hashicorp/golang-lru v0.5.3 // indirect
 	github.com/huandu/xstrings v1.2.0 // indirect
 	github.com/imdario/mergo v0.3.6 // indirect
-	github.com/opentracing/opentracing-go v1.1.0 // indirect
 	github.com/pkg/errors v0.8.1
-	github.com/prometheus/client_golang v0.9.3-0.20190127221311-3c4408c8b829
-	github.com/prometheus/common v0.3.0
-	github.com/prometheus/procfs v0.0.0-20190425082905-87a4384529e0 // indirect
-	github.com/prometheus/prometheus v0.0.0-20190424153033-d3245f150225
-	github.com/spaolacci/murmur3 v1.1.0 // indirect
+	github.com/prometheus/client_golang v1.1.0
+	github.com/prometheus/common v0.7.0
+	github.com/prometheus/prometheus v2.13.0+incompatible
 	go.opencensus.io v0.22.2 // indirect
 	golang.org/x/net v0.0.0-20191109021931-daa7c04131f5 // indirect
 	golang.org/x/oauth2 v0.0.0-20190604053449-0f29369cfe45
