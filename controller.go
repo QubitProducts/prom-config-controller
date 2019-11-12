@@ -24,6 +24,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"reflect"
 	"sort"
 	"text/template"
 	"time"
@@ -298,11 +299,7 @@ func (c *Controller) syncRuleHandler() (bool, error) {
 		var res *rulefmt.RuleGroup
 		res, rerrs = convertRuleGroup(r.GetName(), r)
 
-		//		err = c.updateconftatus(r, err, rerrs)
-		//		if err != nil {
-		//			c.recorder.Event(r, corev1.EventTypeWarning, ErrResourceInvalid, MessageResourceSynced)
-		//			continue
-		//		}
+		c.updatergstatus(r, rerrs)
 		for _, err := range rerrs {
 			glog.Infof("rule error in %v: %v", key, err)
 		}
@@ -425,6 +422,8 @@ func (c *Controller) syncConfigHandler() (bool, error) {
 			return false, errors.Wrap(err, "convert scrape config")
 		}
 
+		c.updatescrapestatus(s, []error{err})
+
 		scrapes[key] = ps
 		scrapeKeys = append(scrapeKeys, key)
 	}
@@ -526,19 +525,50 @@ func updateFile(fn string, bs []byte) (bool, error) {
 	return true, errors.Wrap(ioutil.WriteFile(fn, bs, 0644), "writing config file")
 }
 
-/*
-func (c *Controller) updateconftatus(conf *configV1beta1.RuleGroup, cerr error, errs []error) error {
-	confCopy := conf.DeepCopy()
-	if cerr != nil {
-		confCopy.Status.Errors = append(confCopy.Status.Errors, cerr.Error())
-	}
+func (c *Controller) updatergstatus(org *configV1beta1.RuleGroup, errs []error) error {
+	var err error
+
+	rg := org.DeepCopy()
 	for _, err := range errs {
-		confCopy.Status.Errors = append(confCopy.Status.Errors, err.Error())
+		rg.Status.Errors = append(rg.Status.Errors, err.Error())
 	}
-	_, err := c.confclientset.Config().RuleGroups(confCopy.Namespace).UpdateStatus(confCopy)
+	rg.Status.ErrorCount = len(rg.Status.Errors)
+
+	rcount := 0
+	acount := 0
+	for _, r := range rg.Spec.Rules {
+		if r.Record != "" {
+			rcount++
+		}
+		if r.Alert != "" {
+			acount++
+		}
+	}
+
+	rg.Status.RecordingRuleCount = rcount
+	rg.Status.AlertRuleCount = acount
+	if !reflect.DeepEqual(org.Status, rg.Status) {
+		_, err = c.confclientset.ConfigV1beta1().RuleGroups(rg.Namespace).UpdateStatus(rg)
+	}
+
 	return err
 }
-*/
+
+func (c *Controller) updatescrapestatus(os *configV1beta1.Scrape, errs []error) error {
+	var err error
+	s := os.DeepCopy()
+
+	for _, err := range errs {
+		s.Status.Errors = append(s.Status.Errors, err.Error())
+	}
+	s.Status.ErrorCount = len(s.Status.Errors)
+
+	if !reflect.DeepEqual(os.Status, s.Status) {
+		_, err = c.confclientset.ConfigV1beta1().Scrapes(s.Namespace).UpdateStatus(s)
+	}
+
+	return err
+}
 
 func (c *Controller) enqueuerule(obj interface{}) {
 	var key string

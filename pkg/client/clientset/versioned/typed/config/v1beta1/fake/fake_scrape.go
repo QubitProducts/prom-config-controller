@@ -100,6 +100,18 @@ func (c *FakeScrapes) Update(scrape *v1beta1.Scrape) (result *v1beta1.Scrape, er
 	return obj.(*v1beta1.Scrape), err
 }
 
+// UpdateStatus was generated because the type contains a Status member.
+// Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
+func (c *FakeScrapes) UpdateStatus(scrape *v1beta1.Scrape) (*v1beta1.Scrape, error) {
+	obj, err := c.Fake.
+		Invokes(testing.NewUpdateSubresourceAction(scrapesResource, "status", c.ns, scrape), &v1beta1.Scrape{})
+
+	if obj == nil {
+		return nil, err
+	}
+	return obj.(*v1beta1.Scrape), err
+}
+
 // Delete takes name of the scrape and deletes it. Returns an error if one occurs.
 func (c *FakeScrapes) Delete(name string, options *v1.DeleteOptions) error {
 	_, err := c.Fake.

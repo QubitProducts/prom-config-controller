@@ -8,6 +8,16 @@ metadata:
   creationTimestamp: null
   name: rulegroups.config.prometheus.io
 spec:
+  additionalPrinterColumns:
+  - JSONPath: .status.recordingRules
+    name: Rules
+    type: integer
+  - JSONPath: .status.alertRules
+    name: Alerts
+    type: integer
+  - JSONPath: .status.errorCount
+    name: Errors
+    type: integer
   group: config.prometheus.io
   names:
     kind: RuleGroup
@@ -15,6 +25,8 @@ spec:
     plural: rulegroups
     singular: rulegroup
   scope: ""
+  subresources:
+    status: {}
   validation:
     openAPIV3Schema:
       description: RuleGroup
@@ -32,7 +44,7 @@ spec:
         metadata:
           type: object
         spec:
-          description: RuleGroupSpec is the spec for a Foo resource
+          description: RuleGroupSpec is the spec for a rule group resource
           properties:
             interval:
               type: string
@@ -64,12 +76,22 @@ spec:
           - rules
           type: object
         status:
-          description: RuleGroupStatus is the status for a Foo resource
+          description: RuleGroupStatus is the status for a rule group resource
           properties:
+            alertRules:
+              type: integer
+            errorCount:
+              type: integer
             errors:
               items:
                 type: string
               type: array
+            recordingRules:
+              type: integer
+          required:
+          - alertRules
+          - errorCount
+          - recordingRules
           type: object
       required:
       - spec

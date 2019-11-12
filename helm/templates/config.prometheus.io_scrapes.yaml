@@ -8,6 +8,10 @@ metadata:
   creationTimestamp: null
   name: scrapes.config.prometheus.io
 spec:
+  additionalPrinterColumns:
+  - JSONPath: .status.errorCount
+    name: Errors
+    type: integer
   group: config.prometheus.io
   names:
     kind: Scrape
@@ -15,6 +19,8 @@ spec:
     plural: scrapes
     singular: scrape
   scope: ""
+  subresources:
+    status: {}
   validation:
     openAPIV3Schema:
       description: Scrape
@@ -32,7 +38,10 @@ spec:
         metadata:
           type: object
         spec:
-          description: ScrapeSpec is the spec for a Foo resource
+          description: ScrapeSpec is the spec for a scrape resource
+          type: string
+        status:
+          description: ScrapeSpec is the spec for a scrape resource
           type: string
       required:
       - spec

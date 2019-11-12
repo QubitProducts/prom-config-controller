@@ -17,6 +17,10 @@ type Rule struct {
 // +genclient
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
+// +kubebuilder:subresource:status
+// +kubebuilder:printcolumn:name="Rules",type=integer,JSONPath=`.status.recordingRules`
+// +kubebuilder:printcolumn:name="Alerts",type=integer,JSONPath=`.status.alertRules`
+// +kubebuilder:printcolumn:name="Errors",type=integer,JSONPath=`.status.errorCount`
 // RuleGroup
 type RuleGroup struct {
 	metav1.TypeMeta   `json:",inline"`
@@ -26,20 +30,23 @@ type RuleGroup struct {
 	Status RuleGroupStatus `json:"status,omitempty"`
 }
 
-// RuleGroupSpec is the spec for a Foo resource
+// RuleGroupSpec is the spec for a rule group resource
 type RuleGroupSpec struct {
 	Interval string `json:"interval,omitempty"`
 	Rules    []Rule `json:"rules"`
 }
 
-// RuleGroupStatus is the status for a Foo resource
+// RuleGroupStatus is the status for a rule group resource
 type RuleGroupStatus struct {
-	Errors []string `json:"errors,omitempty"`
+	RecordingRuleCount int      `json:"recordingRules"`
+	AlertRuleCount     int      `json:"alertRules"`
+	ErrorCount         int      `json:"errorCount"`
+	Errors             []string `json:"errors,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-// RuleGroupList is a list of Foo resources
+// RuleGroupList is a list of rule group resources
 type RuleGroupList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata"`
@@ -47,19 +54,27 @@ type RuleGroupList struct {
 	Items []RuleGroup `json:"items"`
 }
 
-// ScrapeSpec is the spec for a Foo resource
+// ScrapeSpec is the spec for a scrape resource
 type ScrapeSpec string
 
 // +genclient
-// +genclient:noStatus
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
+// +kubebuilder:subresource:status
+// +kubebuilder:printcolumn:name="Errors",type=integer,JSONPath=`.status.errorCount`
 // Scrape
 type Scrape struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec ScrapeSpec `json:"spec"`
+	Spec   ScrapeSpec   `json:"spec"`
+	Status ScrapeStatus `json:"status,omitempty"`
+}
+
+// ScrapeStatus is the status for a scrape resource
+type ScrapeStatus struct {
+	ErrorCount int      `json:"errorCount"`
+	Errors     []string `json:"errors,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

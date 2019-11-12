@@ -39,6 +39,7 @@ type ScrapesGetter interface {
 type ScrapeInterface interface {
 	Create(*v1beta1.Scrape) (*v1beta1.Scrape, error)
 	Update(*v1beta1.Scrape) (*v1beta1.Scrape, error)
+	UpdateStatus(*v1beta1.Scrape) (*v1beta1.Scrape, error)
 	Delete(name string, options *v1.DeleteOptions) error
 	DeleteCollection(options *v1.DeleteOptions, listOptions v1.ListOptions) error
 	Get(name string, options v1.GetOptions) (*v1beta1.Scrape, error)
@@ -126,6 +127,22 @@ func (c *scrapes) Update(scrape *v1beta1.Scrape) (result *v1beta1.Scrape, err er
 		Namespace(c.ns).
 		Resource("scrapes").
 		Name(scrape.Name).
+		Body(scrape).
+		Do().
+		Into(result)
+	return
+}
+
+// UpdateStatus was generated because the type contains a Status member.
+// Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
+
+func (c *scrapes) UpdateStatus(scrape *v1beta1.Scrape) (result *v1beta1.Scrape, err error) {
+	result = &v1beta1.Scrape{}
+	err = c.client.Put().
+		Namespace(c.ns).
+		Resource("scrapes").
+		Name(scrape.Name).
+		SubResource("status").
 		Body(scrape).
 		Do().
 		Into(result)
