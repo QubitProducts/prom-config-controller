@@ -41,8 +41,17 @@ spec:
           description: ScrapeSpec is the spec for a scrape resource
           type: string
         status:
-          description: ScrapeSpec is the spec for a scrape resource
-          type: string
+          description: ScrapeStatus is the status for a scrape resource
+          properties:
+            errorCount:
+              type: integer
+            errors:
+              items:
+                type: string
+              type: array
+          required:
+          - errorCount
+          type: object
       required:
       - spec
       type: object
