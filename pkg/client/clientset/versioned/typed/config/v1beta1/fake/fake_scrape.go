@@ -1,5 +1,5 @@
 /*
-Copyright 2019 The Kubernetes sample-controller Authors.
+Copyright 2022 The Kubernetes sample-controller Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ limitations under the License.
 package fake
 
 import (
+	"context"
+
 	v1beta1 "github.com/QubitProducts/prom-config-controller/pkg/apis/config/v1beta1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
@@ -39,7 +41,7 @@ var scrapesResource = schema.GroupVersionResource{Group: "config.prometheus.io",
 var scrapesKind = schema.GroupVersionKind{Group: "config.prometheus.io", Version: "v1beta1", Kind: "Scrape"}
 
 // Get takes name of the scrape, and returns the corresponding scrape object, and an error if there is any.
-func (c *FakeScrapes) Get(name string, options v1.GetOptions) (result *v1beta1.Scrape, err error) {
+func (c *FakeScrapes) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1beta1.Scrape, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewGetAction(scrapesResource, c.ns, name), &v1beta1.Scrape{})
 
@@ -50,7 +52,7 @@ func (c *FakeScrapes) Get(name string, options v1.GetOptions) (result *v1beta1.S
 }
 
 // List takes label and field selectors, and returns the list of Scrapes that match those selectors.
-func (c *FakeScrapes) List(opts v1.ListOptions) (result *v1beta1.ScrapeList, err error) {
+func (c *FakeScrapes) List(ctx context.Context, opts v1.ListOptions) (result *v1beta1.ScrapeList, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewListAction(scrapesResource, scrapesKind, c.ns, opts), &v1beta1.ScrapeList{})
 
@@ -72,14 +74,14 @@ func (c *FakeScrapes) List(opts v1.ListOptions) (result *v1beta1.ScrapeList, err
 }
 
 // Watch returns a watch.Interface that watches the requested scrapes.
-func (c *FakeScrapes) Watch(opts v1.ListOptions) (watch.Interface, error) {
+func (c *FakeScrapes) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
 	return c.Fake.
 		InvokesWatch(testing.NewWatchAction(scrapesResource, c.ns, opts))
 
 }
 
 // Create takes the representation of a scrape and creates it.  Returns the server's representation of the scrape, and an error, if there is any.
-func (c *FakeScrapes) Create(scrape *v1beta1.Scrape) (result *v1beta1.Scrape, err error) {
+func (c *FakeScrapes) Create(ctx context.Context, scrape *v1beta1.Scrape, opts v1.CreateOptions) (result *v1beta1.Scrape, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewCreateAction(scrapesResource, c.ns, scrape), &v1beta1.Scrape{})
 
@@ -90,7 +92,7 @@ func (c *FakeScrapes) Create(scrape *v1beta1.Scrape) (result *v1beta1.Scrape, er
 }
 
 // Update takes the representation of a scrape and updates it. Returns the server's representation of the scrape, and an error, if there is any.
-func (c *FakeScrapes) Update(scrape *v1beta1.Scrape) (result *v1beta1.Scrape, err error) {
+func (c *FakeScrapes) Update(ctx context.Context, scrape *v1beta1.Scrape, opts v1.UpdateOptions) (result *v1beta1.Scrape, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewUpdateAction(scrapesResource, c.ns, scrape), &v1beta1.Scrape{})
 
@@ -102,7 +104,7 @@ func (c *FakeScrapes) Update(scrape *v1beta1.Scrape) (result *v1beta1.Scrape, er
 
 // UpdateStatus was generated because the type contains a Status member.
 // Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
-func (c *FakeScrapes) UpdateStatus(scrape *v1beta1.Scrape) (*v1beta1.Scrape, error) {
+func (c *FakeScrapes) UpdateStatus(ctx context.Context, scrape *v1beta1.Scrape, opts v1.UpdateOptions) (*v1beta1.Scrape, error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewUpdateSubresourceAction(scrapesResource, "status", c.ns, scrape), &v1beta1.Scrape{})
 
@@ -113,23 +115,23 @@ func (c *FakeScrapes) UpdateStatus(scrape *v1beta1.Scrape) (*v1beta1.Scrape, err
 }
 
 // Delete takes name of the scrape and deletes it. Returns an error if one occurs.
-func (c *FakeScrapes) Delete(name string, options *v1.DeleteOptions) error {
+func (c *FakeScrapes) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
 	_, err := c.Fake.
-		Invokes(testing.NewDeleteAction(scrapesResource, c.ns, name), &v1beta1.Scrape{})
+		Invokes(testing.NewDeleteActionWithOptions(scrapesResource, c.ns, name, opts), &v1beta1.Scrape{})
 
 	return err
 }
 
 // DeleteCollection deletes a collection of objects.
-func (c *FakeScrapes) DeleteCollection(options *v1.DeleteOptions, listOptions v1.ListOptions) error {
-	action := testing.NewDeleteCollectionAction(scrapesResource, c.ns, listOptions)
+func (c *FakeScrapes) DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error {
+	action := testing.NewDeleteCollectionAction(scrapesResource, c.ns, listOpts)
 
 	_, err := c.Fake.Invokes(action, &v1beta1.ScrapeList{})
 	return err
 }
 
 // Patch applies the patch and returns the patched scrape.
-func (c *FakeScrapes) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1beta1.Scrape, err error) {
+func (c *FakeScrapes) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1beta1.Scrape, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewPatchSubresourceAction(scrapesResource, c.ns, name, pt, data, subresources...), &v1beta1.Scrape{})
 

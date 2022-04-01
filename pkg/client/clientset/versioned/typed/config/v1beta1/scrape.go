@@ -1,5 +1,5 @@
 /*
-Copyright 2019 The Kubernetes sample-controller Authors.
+Copyright 2022 The Kubernetes sample-controller Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ limitations under the License.
 package v1beta1
 
 import (
+	"context"
 	"time"
 
 	v1beta1 "github.com/QubitProducts/prom-config-controller/pkg/apis/config/v1beta1"
@@ -37,15 +38,15 @@ type ScrapesGetter interface {
 
 // ScrapeInterface has methods to work with Scrape resources.
 type ScrapeInterface interface {
-	Create(*v1beta1.Scrape) (*v1beta1.Scrape, error)
-	Update(*v1beta1.Scrape) (*v1beta1.Scrape, error)
-	UpdateStatus(*v1beta1.Scrape) (*v1beta1.Scrape, error)
-	Delete(name string, options *v1.DeleteOptions) error
-	DeleteCollection(options *v1.DeleteOptions, listOptions v1.ListOptions) error
-	Get(name string, options v1.GetOptions) (*v1beta1.Scrape, error)
-	List(opts v1.ListOptions) (*v1beta1.ScrapeList, error)
-	Watch(opts v1.ListOptions) (watch.Interface, error)
-	Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1beta1.Scrape, err error)
+	Create(ctx context.Context, scrape *v1beta1.Scrape, opts v1.CreateOptions) (*v1beta1.Scrape, error)
+	Update(ctx context.Context, scrape *v1beta1.Scrape, opts v1.UpdateOptions) (*v1beta1.Scrape, error)
+	UpdateStatus(ctx context.Context, scrape *v1beta1.Scrape, opts v1.UpdateOptions) (*v1beta1.Scrape, error)
+	Delete(ctx context.Context, name string, opts v1.DeleteOptions) error
+	DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error
+	Get(ctx context.Context, name string, opts v1.GetOptions) (*v1beta1.Scrape, error)
+	List(ctx context.Context, opts v1.ListOptions) (*v1beta1.ScrapeList, error)
+	Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error)
+	Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1beta1.Scrape, err error)
 	ScrapeExpansion
 }
 
@@ -64,20 +65,20 @@ func newScrapes(c *ConfigV1beta1Client, namespace string) *scrapes {
 }
 
 // Get takes name of the scrape, and returns the corresponding scrape object, and an error if there is any.
-func (c *scrapes) Get(name string, options v1.GetOptions) (result *v1beta1.Scrape, err error) {
+func (c *scrapes) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1beta1.Scrape, err error) {
 	result = &v1beta1.Scrape{}
 	err = c.client.Get().
 		Namespace(c.ns).
 		Resource("scrapes").
 		Name(name).
 		VersionedParams(&options, scheme.ParameterCodec).
-		Do().
+		Do(ctx).
 		Into(result)
 	return
 }
 
 // List takes label and field selectors, and returns the list of Scrapes that match those selectors.
-func (c *scrapes) List(opts v1.ListOptions) (result *v1beta1.ScrapeList, err error) {
+func (c *scrapes) List(ctx context.Context, opts v1.ListOptions) (result *v1beta1.ScrapeList, err error) {
 	var timeout time.Duration
 	if opts.TimeoutSeconds != nil {
 		timeout = time.Duration(*opts.TimeoutSeconds) * time.Second
@@ -88,13 +89,13 @@ func (c *scrapes) List(opts v1.ListOptions) (result *v1beta1.ScrapeList, err err
 		Resource("scrapes").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Timeout(timeout).
-		Do().
+		Do(ctx).
 		Into(result)
 	return
 }
 
 // Watch returns a watch.Interface that watches the requested scrapes.
-func (c *scrapes) Watch(opts v1.ListOptions) (watch.Interface, error) {
+func (c *scrapes) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
 	var timeout time.Duration
 	if opts.TimeoutSeconds != nil {
 		timeout = time.Duration(*opts.TimeoutSeconds) * time.Second
@@ -105,87 +106,90 @@ func (c *scrapes) Watch(opts v1.ListOptions) (watch.Interface, error) {
 		Resource("scrapes").
 		VersionedParams(&opts, scheme.ParameterCodec).
 		Timeout(timeout).
-		Watch()
+		Watch(ctx)
 }
 
 // Create takes the representation of a scrape and creates it.  Returns the server's representation of the scrape, and an error, if there is any.
-func (c *scrapes) Create(scrape *v1beta1.Scrape) (result *v1beta1.Scrape, err error) {
+func (c *scrapes) Create(ctx context.Context, scrape *v1beta1.Scrape, opts v1.CreateOptions) (result *v1beta1.Scrape, err error) {
 	result = &v1beta1.Scrape{}
 	err = c.client.Post().
 		Namespace(c.ns).
 		Resource("scrapes").
+		VersionedParams(&opts, scheme.ParameterCodec).
 		Body(scrape).
-		Do().
+		Do(ctx).
 		Into(result)
 	return
 }
 
 // Update takes the representation of a scrape and updates it. Returns the server's representation of the scrape, and an error, if there is any.
-func (c *scrapes) Update(scrape *v1beta1.Scrape) (result *v1beta1.Scrape, err error) {
+func (c *scrapes) Update(ctx context.Context, scrape *v1beta1.Scrape, opts v1.UpdateOptions) (result *v1beta1.Scrape, err error) {
 	result = &v1beta1.Scrape{}
 	err = c.client.Put().
 		Namespace(c.ns).
 		Resource("scrapes").
 		Name(scrape.Name).
+		VersionedParams(&opts, scheme.ParameterCodec).
 		Body(scrape).
-		Do().
+		Do(ctx).
 		Into(result)
 	return
 }
 
 // UpdateStatus was generated because the type contains a Status member.
 // Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
-
-func (c *scrapes) UpdateStatus(scrape *v1beta1.Scrape) (result *v1beta1.Scrape, err error) {
+func (c *scrapes) UpdateStatus(ctx context.Context, scrape *v1beta1.Scrape, opts v1.UpdateOptions) (result *v1beta1.Scrape, err error) {
 	result = &v1beta1.Scrape{}
 	err = c.client.Put().
 		Namespace(c.ns).
 		Resource("scrapes").
 		Name(scrape.Name).
 		SubResource("status").
+		VersionedParams(&opts, scheme.ParameterCodec).
 		Body(scrape).
-		Do().
+		Do(ctx).
 		Into(result)
 	return
 }
 
 // Delete takes name of the scrape and deletes it. Returns an error if one occurs.
-func (c *scrapes) Delete(name string, options *v1.DeleteOptions) error {
+func (c *scrapes) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
 	return c.client.Delete().
 		Namespace(c.ns).
 		Resource("scrapes").
 		Name(name).
-		Body(options).
-		Do().
+		Body(&opts).
+		Do(ctx).
 		Error()
 }
 
 // DeleteCollection deletes a collection of objects.
-func (c *scrapes) DeleteCollection(options *v1.DeleteOptions, listOptions v1.ListOptions) error {
+func (c *scrapes) DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error {
 	var timeout time.Duration
-	if listOptions.TimeoutSeconds != nil {
-		timeout = time.Duration(*listOptions.TimeoutSeconds) * time.Second
+	if listOpts.TimeoutSeconds != nil {
+		timeout = time.Duration(*listOpts.TimeoutSeconds) * time.Second
 	}
 	return c.client.Delete().
 		Namespace(c.ns).
 		Resource("scrapes").
-		VersionedParams(&listOptions, scheme.ParameterCodec).
+		VersionedParams(&listOpts, scheme.ParameterCodec).
 		Timeout(timeout).
-		Body(options).
-		Do().
+		Body(&opts).
+		Do(ctx).
 		Error()
 }
 
 // Patch applies the patch and returns the patched scrape.
-func (c *scrapes) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1beta1.Scrape, err error) {
+func (c *scrapes) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1beta1.Scrape, err error) {
 	result = &v1beta1.Scrape{}
 	err = c.client.Patch(pt).
 		Namespace(c.ns).
 		Resource("scrapes").
-		SubResource(subresources...).
 		Name(name).
+		SubResource(subresources...).
+		VersionedParams(&opts, scheme.ParameterCodec).
 		Body(data).
-		Do().
+		Do(ctx).
 		Into(result)
 	return
 }

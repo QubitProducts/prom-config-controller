@@ -1,5 +1,5 @@
 /*
-Copyright 2019 The Kubernetes sample-controller Authors.
+Copyright 2022 The Kubernetes sample-controller Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -26,8 +26,10 @@ import (
 )
 
 // RuleGroupLister helps list RuleGroups.
+// All objects returned here must be treated as read-only.
 type RuleGroupLister interface {
 	// List lists all RuleGroups in the indexer.
+	// Objects returned here must be treated as read-only.
 	List(selector labels.Selector) (ret []*v1beta1.RuleGroup, err error)
 	// RuleGroups returns an object that can list and get RuleGroups.
 	RuleGroups(namespace string) RuleGroupNamespaceLister
@@ -58,10 +60,13 @@ func (s *ruleGroupLister) RuleGroups(namespace string) RuleGroupNamespaceLister 
 }
 
 // RuleGroupNamespaceLister helps list and get RuleGroups.
+// All objects returned here must be treated as read-only.
 type RuleGroupNamespaceLister interface {
 	// List lists all RuleGroups in the indexer for a given namespace.
+	// Objects returned here must be treated as read-only.
 	List(selector labels.Selector) (ret []*v1beta1.RuleGroup, err error)
 	// Get retrieves the RuleGroup from the indexer for a given namespace and name.
+	// Objects returned here must be treated as read-only.
 	Get(name string) (*v1beta1.RuleGroup, error)
 	RuleGroupNamespaceListerExpansion
 }

@@ -333,11 +333,12 @@ func (c *Controller) syncRuleHandler() (bool, error) {
 }
 
 func (c *Controller) updateConfigMap(name, key, namespace string, bs []byte) (bool, error) {
+	ctx := context.Background()
 	if name == "" || key == "" {
 		return false, nil
 	}
 
-	oldcm, err := c.kubeclientset.CoreV1().ConfigMaps(namespace).Get(name, metav1.GetOptions{})
+	oldcm, err := c.kubeclientset.CoreV1().ConfigMaps(namespace).Get(ctx, name, metav1.GetOptions{})
 	if kerrors.IsNotFound(err) {
 		oldcm = &corev1.ConfigMap{
 			ObjectMeta: metav1.ObjectMeta{
@@ -346,7 +347,7 @@ func (c *Controller) updateConfigMap(name, key, namespace string, bs []byte) (bo
 			},
 			Data: map[string]string{},
 		}
-		oldcm, err = c.kubeclientset.CoreV1().ConfigMaps(namespace).Create(oldcm)
+		oldcm, err = c.kubeclientset.CoreV1().ConfigMaps(namespace).Create(ctx, oldcm, metav1.CreateOptions{})
 		if err != nil {
 			return false, err
 		}
@@ -368,7 +369,7 @@ func (c *Controller) updateConfigMap(name, key, namespace string, bs []byte) (bo
 	}
 
 	newcm.Data[key] = string(bs)
-	_, err = c.kubeclientset.CoreV1().ConfigMaps(namespace).Update(newcm)
+	_, err = c.kubeclientset.CoreV1().ConfigMaps(namespace).Update(ctx, newcm, metav1.UpdateOptions{})
 	if err != nil {
 		return false, err
 	}
@@ -455,11 +456,12 @@ func (c *Controller) syncConfigHandler() (bool, error) {
 }
 
 func (c *Controller) updateSecret(name, key, namespace string, bs []byte) (bool, error) {
+	ctx := context.Background()
 	if name == "" || key == "" {
 		return false, nil
 	}
 
-	oldsec, err := c.kubeclientset.CoreV1().Secrets(namespace).Get(name, metav1.GetOptions{})
+	oldsec, err := c.kubeclientset.CoreV1().Secrets(namespace).Get(ctx, name, metav1.GetOptions{})
 	if kerrors.IsNotFound(err) {
 		oldsec = &corev1.Secret{
 			ObjectMeta: metav1.ObjectMeta{
@@ -468,7 +470,7 @@ func (c *Controller) updateSecret(name, key, namespace string, bs []byte) (bool,
 			},
 			Data: map[string][]byte{},
 		}
-		oldsec, err = c.kubeclientset.CoreV1().Secrets(namespace).Create(oldsec)
+		oldsec, err = c.kubeclientset.CoreV1().Secrets(namespace).Create(ctx, oldsec, metav1.CreateOptions{})
 		if err != nil {
 			return false, err
 		}
@@ -489,7 +491,7 @@ func (c *Controller) updateSecret(name, key, namespace string, bs []byte) (bool,
 	}
 
 	newsec.Data[key] = bs
-	_, err = c.kubeclientset.CoreV1().Secrets(namespace).Update(newsec)
+	_, err = c.kubeclientset.CoreV1().Secrets(namespace).Update(ctx, newsec, metav1.UpdateOptions{})
 	if err != nil {
 		return false, errors.Wrap(err, "writing config secret")
 	}
@@ -526,6 +528,7 @@ func updateFile(fn string, bs []byte) (bool, error) {
 }
 
 func (c *Controller) updatergstatus(org *configV1beta1.RuleGroup, errs []error) error {
+	ctx := context.Background()
 	var err error
 
 	rg := org.DeepCopy()
@@ -548,13 +551,14 @@ func (c *Controller) updatergstatus(org *configV1beta1.RuleGroup, errs []error) 
 	rg.Status.RecordingRuleCount = rcount
 	rg.Status.AlertRuleCount = acount
 	if !reflect.DeepEqual(org.Status, rg.Status) {
-		_, err = c.confclientset.ConfigV1beta1().RuleGroups(rg.Namespace).UpdateStatus(rg)
+		_, err = c.confclientset.ConfigV1beta1().RuleGroups(rg.Namespace).UpdateStatus(ctx, rg, metav1.UpdateOptions{})
 	}
 
 	return err
 }
 
 func (c *Controller) updatescrapestatus(os *configV1beta1.Scrape, errs []error) error {
+	ctx := context.Background()
 	var err error
 	s := os.DeepCopy()
 
@@ -564,7 +568,7 @@ func (c *Controller) updatescrapestatus(os *configV1beta1.Scrape, errs []error) 
 	s.Status.ErrorCount = len(s.Status.Errors)
 
 	if !reflect.DeepEqual(os.Status, s.Status) {
-		_, err = c.confclientset.ConfigV1beta1().Scrapes(s.Namespace).UpdateStatus(s)
+		_, err = c.confclientset.ConfigV1beta1().Scrapes(s.Namespace).UpdateStatus(ctx, s, metav1.UpdateOptions{})
 	}
 
 	return err

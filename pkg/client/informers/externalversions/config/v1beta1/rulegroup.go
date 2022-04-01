@@ -1,5 +1,5 @@
 /*
-Copyright 2019 The Kubernetes sample-controller Authors.
+Copyright 2022 The Kubernetes sample-controller Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,6 +19,7 @@ limitations under the License.
 package v1beta1
 
 import (
+	"context"
 	time "time"
 
 	configv1beta1 "github.com/QubitProducts/prom-config-controller/pkg/apis/config/v1beta1"
@@ -61,13 +62,13 @@ func NewFilteredRuleGroupInformer(client versioned.Interface, namespace string, 
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.ConfigV1beta1().RuleGroups(namespace).List(options)
+				return client.ConfigV1beta1().RuleGroups(namespace).List(context.TODO(), options)
 			},
 			WatchFunc: func(options v1.ListOptions) (watch.Interface, error) {
 				if tweakListOptions != nil {
 					tweakListOptions(&options)
 				}
-				return client.ConfigV1beta1().RuleGroups(namespace).Watch(options)
+				return client.ConfigV1beta1().RuleGroups(namespace).Watch(context.TODO(), options)
 			},
 		},
 		&configv1beta1.RuleGroup{},

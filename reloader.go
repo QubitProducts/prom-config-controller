@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"io"
 	"io/ioutil"
 	"net"
@@ -66,8 +67,9 @@ func (r *reloader) reloadURL() {
 }
 
 func (r *reloader) reloadEndpoints() {
+	ctx := context.Background()
 	glog.V(2).Info("performing endpoint reload")
-	eps, err := r.client.CoreV1().Endpoints(r.namespace).Get(r.name, metav1.GetOptions{})
+	eps, err := r.client.CoreV1().Endpoints(r.namespace).Get(ctx, r.name, metav1.GetOptions{})
 	if err != nil {
 		glog.V(1).Infof("failed listing reload endpoints, %v", err)
 		return

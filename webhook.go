@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -11,8 +12,8 @@ import (
 
 	configV1beta1 "github.com/QubitProducts/prom-config-controller/pkg/apis/config/v1beta1"
 	"github.com/golang/glog"
-	"k8s.io/api/admission/v1beta1"
-	regv1beta1 "k8s.io/api/admissionregistration/v1beta1"
+	v1 "k8s.io/api/admission/v1"
+	regv1 "k8s.io/api/admissionregistration/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/serializer"
@@ -21,10 +22,10 @@ import (
 
 var codecs = serializer.NewCodecFactory(scheme.Scheme)
 
-type admitFunc func(v1beta1.AdmissionReview) *v1beta1.AdmissionResponse
+type admitFunc func(v1.AdmissionReview) *v1.AdmissionResponse
 
-func toAdmissionResponse(err error) *v1beta1.AdmissionResponse {
-	return &v1beta1.AdmissionResponse{
+func toAdmissionResponse(err error) *v1.AdmissionResponse {
+	return &v1.AdmissionResponse{
 		Result: &metav1.Status{
 			Message: err.Error(),
 		},
@@ -47,8 +48,8 @@ func serveValidate(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var reviewResponse *v1beta1.AdmissionResponse
-	ar := v1beta1.AdmissionReview{}
+	var reviewResponse *v1.AdmissionResponse
+	ar := v1.AdmissionReview{}
 	deserializer := codecs.UniversalDeserializer()
 	if _, _, err := deserializer.Decode(body, nil, &ar); err != nil {
 		glog.Error(err)
@@ -57,7 +58,7 @@ func serveValidate(w http.ResponseWriter, r *http.Request) {
 		reviewResponse = admit(ar)
 	}
 
-	response := v1beta1.AdmissionReview{}
+	response := v1.AdmissionReview{}
 	if reviewResponse != nil {
 		response.Response = reviewResponse
 		response.Response.UID = ar.Request.UID
@@ -75,7 +76,7 @@ func serveValidate(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func admit(ar v1beta1.AdmissionReview) *v1beta1.AdmissionResponse {
+func admit(ar v1.AdmissionReview) *v1.AdmissionResponse {
 	glog.V(2).Info("admitting prometheus resource")
 	if ar.Request.Resource.Group != configV1beta1.SchemeGroupVersion.Group ||
 		ar.Request.Resource.Version != configV1beta1.SchemeGroupVersion.Version {
@@ -96,7 +97,7 @@ func admit(ar v1beta1.AdmissionReview) *v1beta1.AdmissionResponse {
 	}
 }
 
-func admitRuleGroups(ar v1beta1.AdmissionReview) *v1beta1.AdmissionResponse {
+func admitRuleGroups(ar v1.AdmissionReview) *v1.AdmissionResponse {
 	glog.V(2).Info("admitting prometheus rule group")
 
 	raw := ar.Request.Object.Raw
@@ -106,7 +107,7 @@ func admitRuleGroups(ar v1beta1.AdmissionReview) *v1beta1.AdmissionResponse {
 		glog.Error(err)
 		return toAdmissionResponse(err)
 	}
-	reviewResponse := v1beta1.AdmissionResponse{
+	reviewResponse := v1.AdmissionResponse{
 		Allowed: true,
 	}
 
@@ -134,7 +135,7 @@ func admitRuleGroups(ar v1beta1.AdmissionReview) *v1beta1.AdmissionResponse {
 	return &reviewResponse
 }
 
-func admitScrapes(ar v1beta1.AdmissionReview) *v1beta1.AdmissionResponse {
+func admitScrapes(ar v1.AdmissionReview) *v1.AdmissionResponse {
 	glog.V(2).Info("admitting prometheus scrape")
 
 	raw := ar.Request.Object.Raw
@@ -144,7 +145,7 @@ func admitScrapes(ar v1beta1.AdmissionReview) *v1beta1.AdmissionResponse {
 		glog.Error(err)
 		return toAdmissionResponse(err)
 	}
-	reviewResponse := v1beta1.AdmissionResponse{
+	reviewResponse := v1.AdmissionResponse{
 		Allowed: true,
 	}
 
@@ -171,34 +172,35 @@ func admitScrapes(ar v1beta1.AdmissionReview) *v1beta1.AdmissionResponse {
 // register this webhook admission controller with the kube-apiserver
 // by creating MutatingWebhookConfiguration.
 func (c *Controller) selfRegistration() error {
+	ctx := context.Background()
 	webhookName := "prom-config-controller"
 	path := "/validate"
 	time.Sleep(10 * time.Second)
-	client := c.kubeclientset.AdmissionregistrationV1beta1().ValidatingWebhookConfigurations()
-	_, err := client.Get(webhookName, metav1.GetOptions{})
+	client := c.kubeclientset.AdmissionregistrationV1().ValidatingWebhookConfigurations()
+	_, err := client.Get(ctx, webhookName, metav1.GetOptions{})
 	if err == nil {
-		if err2 := client.Delete(webhookName, nil); err2 != nil {
+		if err2 := client.Delete(ctx, webhookName, metav1.DeleteOptions{}); err2 != nil {
 			return err2
 		}
 	}
-	webhookConfig := &regv1beta1.ValidatingWebhookConfiguration{
+	webhookConfig := &regv1.ValidatingWebhookConfiguration{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: webhookName,
 		},
-		Webhooks: []regv1beta1.ValidatingWebhook{
+		Webhooks: []regv1.ValidatingWebhook{
 			{
 				Name: configV1beta1.SchemeGroupVersion.Group,
-				Rules: []regv1beta1.RuleWithOperations{
+				Rules: []regv1.RuleWithOperations{
 					{
-						Operations: []regv1beta1.OperationType{regv1beta1.Create, regv1beta1.Update},
-						Rule: regv1beta1.Rule{
+						Operations: []regv1.OperationType{regv1.Create, regv1.Update},
+						Rule: regv1.Rule{
 							APIGroups:   []string{configV1beta1.SchemeGroupVersion.Group},
 							APIVersions: []string{configV1beta1.SchemeGroupVersion.Version},
 							Resources:   []string{"rulegroups", "scrapes"},
 						},
 					}},
-				ClientConfig: regv1beta1.WebhookClientConfig{
-					Service: &regv1beta1.ServiceReference{
+				ClientConfig: regv1.WebhookClientConfig{
+					Service: &regv1.ServiceReference{
 						Namespace: c.ServiceNS,
 						Name:      c.ServiceName,
 						Path:      &path,
@@ -208,7 +210,7 @@ func (c *Controller) selfRegistration() error {
 			},
 		},
 	}
-	if _, err := client.Create(webhookConfig); err != nil {
+	if _, err := client.Create(ctx, webhookConfig, metav1.CreateOptions{}); err != nil {
 		return err
 	}
 

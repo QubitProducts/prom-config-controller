@@ -1,5 +1,5 @@
 /*
-Copyright 2019 The Kubernetes sample-controller Authors.
+Copyright 2022 The Kubernetes sample-controller Authors.
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -19,6 +19,8 @@ limitations under the License.
 package fake
 
 import (
+	"context"
+
 	v1beta1 "github.com/QubitProducts/prom-config-controller/pkg/apis/config/v1beta1"
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	labels "k8s.io/apimachinery/pkg/labels"
@@ -39,7 +41,7 @@ var rulegroupsResource = schema.GroupVersionResource{Group: "config.prometheus.i
 var rulegroupsKind = schema.GroupVersionKind{Group: "config.prometheus.io", Version: "v1beta1", Kind: "RuleGroup"}
 
 // Get takes name of the ruleGroup, and returns the corresponding ruleGroup object, and an error if there is any.
-func (c *FakeRuleGroups) Get(name string, options v1.GetOptions) (result *v1beta1.RuleGroup, err error) {
+func (c *FakeRuleGroups) Get(ctx context.Context, name string, options v1.GetOptions) (result *v1beta1.RuleGroup, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewGetAction(rulegroupsResource, c.ns, name), &v1beta1.RuleGroup{})
 
@@ -50,7 +52,7 @@ func (c *FakeRuleGroups) Get(name string, options v1.GetOptions) (result *v1beta
 }
 
 // List takes label and field selectors, and returns the list of RuleGroups that match those selectors.
-func (c *FakeRuleGroups) List(opts v1.ListOptions) (result *v1beta1.RuleGroupList, err error) {
+func (c *FakeRuleGroups) List(ctx context.Context, opts v1.ListOptions) (result *v1beta1.RuleGroupList, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewListAction(rulegroupsResource, rulegroupsKind, c.ns, opts), &v1beta1.RuleGroupList{})
 
@@ -72,14 +74,14 @@ func (c *FakeRuleGroups) List(opts v1.ListOptions) (result *v1beta1.RuleGroupLis
 }
 
 // Watch returns a watch.Interface that watches the requested ruleGroups.
-func (c *FakeRuleGroups) Watch(opts v1.ListOptions) (watch.Interface, error) {
+func (c *FakeRuleGroups) Watch(ctx context.Context, opts v1.ListOptions) (watch.Interface, error) {
 	return c.Fake.
 		InvokesWatch(testing.NewWatchAction(rulegroupsResource, c.ns, opts))
 
 }
 
 // Create takes the representation of a ruleGroup and creates it.  Returns the server's representation of the ruleGroup, and an error, if there is any.
-func (c *FakeRuleGroups) Create(ruleGroup *v1beta1.RuleGroup) (result *v1beta1.RuleGroup, err error) {
+func (c *FakeRuleGroups) Create(ctx context.Context, ruleGroup *v1beta1.RuleGroup, opts v1.CreateOptions) (result *v1beta1.RuleGroup, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewCreateAction(rulegroupsResource, c.ns, ruleGroup), &v1beta1.RuleGroup{})
 
@@ -90,7 +92,7 @@ func (c *FakeRuleGroups) Create(ruleGroup *v1beta1.RuleGroup) (result *v1beta1.R
 }
 
 // Update takes the representation of a ruleGroup and updates it. Returns the server's representation of the ruleGroup, and an error, if there is any.
-func (c *FakeRuleGroups) Update(ruleGroup *v1beta1.RuleGroup) (result *v1beta1.RuleGroup, err error) {
+func (c *FakeRuleGroups) Update(ctx context.Context, ruleGroup *v1beta1.RuleGroup, opts v1.UpdateOptions) (result *v1beta1.RuleGroup, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewUpdateAction(rulegroupsResource, c.ns, ruleGroup), &v1beta1.RuleGroup{})
 
@@ -102,7 +104,7 @@ func (c *FakeRuleGroups) Update(ruleGroup *v1beta1.RuleGroup) (result *v1beta1.R
 
 // UpdateStatus was generated because the type contains a Status member.
 // Add a +genclient:noStatus comment above the type to avoid generating UpdateStatus().
-func (c *FakeRuleGroups) UpdateStatus(ruleGroup *v1beta1.RuleGroup) (*v1beta1.RuleGroup, error) {
+func (c *FakeRuleGroups) UpdateStatus(ctx context.Context, ruleGroup *v1beta1.RuleGroup, opts v1.UpdateOptions) (*v1beta1.RuleGroup, error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewUpdateSubresourceAction(rulegroupsResource, "status", c.ns, ruleGroup), &v1beta1.RuleGroup{})
 
@@ -113,23 +115,23 @@ func (c *FakeRuleGroups) UpdateStatus(ruleGroup *v1beta1.RuleGroup) (*v1beta1.Ru
 }
 
 // Delete takes name of the ruleGroup and deletes it. Returns an error if one occurs.
-func (c *FakeRuleGroups) Delete(name string, options *v1.DeleteOptions) error {
+func (c *FakeRuleGroups) Delete(ctx context.Context, name string, opts v1.DeleteOptions) error {
 	_, err := c.Fake.
-		Invokes(testing.NewDeleteAction(rulegroupsResource, c.ns, name), &v1beta1.RuleGroup{})
+		Invokes(testing.NewDeleteActionWithOptions(rulegroupsResource, c.ns, name, opts), &v1beta1.RuleGroup{})
 
 	return err
 }
 
 // DeleteCollection deletes a collection of objects.
-func (c *FakeRuleGroups) DeleteCollection(options *v1.DeleteOptions, listOptions v1.ListOptions) error {
-	action := testing.NewDeleteCollectionAction(rulegroupsResource, c.ns, listOptions)
+func (c *FakeRuleGroups) DeleteCollection(ctx context.Context, opts v1.DeleteOptions, listOpts v1.ListOptions) error {
+	action := testing.NewDeleteCollectionAction(rulegroupsResource, c.ns, listOpts)
 
 	_, err := c.Fake.Invokes(action, &v1beta1.RuleGroupList{})
 	return err
 }
 
 // Patch applies the patch and returns the patched ruleGroup.
-func (c *FakeRuleGroups) Patch(name string, pt types.PatchType, data []byte, subresources ...string) (result *v1beta1.RuleGroup, err error) {
+func (c *FakeRuleGroups) Patch(ctx context.Context, name string, pt types.PatchType, data []byte, opts v1.PatchOptions, subresources ...string) (result *v1beta1.RuleGroup, err error) {
 	obj, err := c.Fake.
 		Invokes(testing.NewPatchSubresourceAction(rulegroupsResource, c.ns, name, pt, data, subresources...), &v1beta1.RuleGroup{})
 
