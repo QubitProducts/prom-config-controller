@@ -183,6 +183,7 @@ func (c *Controller) selfRegistration() error {
 			return err2
 		}
 	}
+	sideEffects := regv1.SideEffectClassNone
 	webhookConfig := &regv1.ValidatingWebhookConfiguration{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: webhookName,
@@ -207,6 +208,8 @@ func (c *Controller) selfRegistration() error {
 					},
 					CABundle: c.CACert,
 				},
+				AdmissionReviewVersions: []string{"v1"},
+				SideEffects:             &sideEffects,
 			},
 		},
 	}
