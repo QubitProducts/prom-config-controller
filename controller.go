@@ -418,12 +418,18 @@ func (c *Controller) syncConfigHandler() (bool, error) {
 			continue
 		}
 
-		ps, err := convertScrape(s.GetName(), s)
-		if err != nil {
-			return false, errors.Wrap(err, "convert scrape config")
+		var serr error
+		ps, serr := convertScrape(s.GetName(), s)
+
+		var errs []error
+		if serr != nil {
+			errs = []error{serr}
 		}
 
-		c.updatescrapestatus(s, []error{err})
+		c.updatescrapestatus(s, errs)
+		if len(errs) > 0 {
+			continue
+		}
 
 		scrapes[key] = ps
 		scrapeKeys = append(scrapeKeys, key)
