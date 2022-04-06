@@ -63,7 +63,12 @@ func serveValidate(w http.ResponseWriter, r *http.Request) {
 		reviewResponse = admit(ar)
 	}
 
-	response := v1.AdmissionReview{}
+	response := v1.AdmissionReview{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: v1.SchemeGroupVersion.String(),
+			Kind:       "AdmissionReview",
+		},
+	}
 	if reviewResponse != nil {
 		response.Response = reviewResponse
 		response.Response.UID = ar.Request.UID
