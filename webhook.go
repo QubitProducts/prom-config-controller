@@ -49,7 +49,12 @@ func serveValidate(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var reviewResponse *v1.AdmissionResponse
-	ar := v1.AdmissionReview{}
+	ar := v1.AdmissionReview{
+		TypeMeta: metav1.TypeMeta{
+			APIVersion: v1.SchemeGroupVersion.String(),
+			Kind:       "AdmissionReview",
+		},
+	}
 	deserializer := codecs.UniversalDeserializer()
 	if _, _, err := deserializer.Decode(body, nil, &ar); err != nil {
 		glog.Error(err)
