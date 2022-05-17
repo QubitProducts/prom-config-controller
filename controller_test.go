@@ -157,7 +157,7 @@ func newScrape(name string, s string) *conf.Scrape {
 
 func newConfigMap(namespace, name, key, data string) *corev1.ConfigMap {
 	return &corev1.ConfigMap{
-		TypeMeta: metav1.TypeMeta{APIVersion: corev1.SchemeGroupVersion.String()},
+		TypeMeta: metav1.TypeMeta{},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: namespace,
@@ -168,7 +168,7 @@ func newConfigMap(namespace, name, key, data string) *corev1.ConfigMap {
 
 func newSecret(namespace, name, key, data string) *corev1.Secret {
 	return &corev1.Secret{
-		TypeMeta: metav1.TypeMeta{APIVersion: corev1.SchemeGroupVersion.String()},
+		TypeMeta: metav1.TypeMeta{},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: namespace,
@@ -265,7 +265,7 @@ func (f *fixture) runController(obj interface{}, startInformers bool, expectErro
 	f.t.Logf("actions: %#v", actions)
 	for i, action := range actions {
 		if len(f.actions) < i+1 {
-			f.t.Errorf("%d unexpected actions: %+v", len(actions)-len(f.actions), actions[i:])
+			f.t.Errorf("%d unexpected actions: %#v", len(actions)-len(f.actions), actions[i:])
 			break
 		}
 
@@ -365,11 +365,13 @@ func filterInformerActions(actions []core.Action) []core.Action {
 }
 
 func (f *fixture) expectCreateRuleGroupsAction(rs *conf.RuleGroup) {
-	f.actions = append(f.actions, core.NewCreateAction(schema.GroupVersionResource{
-		Resource: "rulegroups",
-		Group:    conf.SchemeGroupVersion.Group,
-		Version:  conf.SchemeGroupVersion.Version,
-	}, rs.Namespace, rs))
+	f.actions = append(f.actions,
+		core.NewCreateAction(schema.GroupVersionResource{
+			Resource: "rulegroups",
+			Group:    conf.SchemeGroupVersion.Group,
+			Version:  conf.SchemeGroupVersion.Version,
+		}, rs.Namespace, rs),
+	)
 }
 
 func (f *fixture) expectUpdateRuleGroupsAction(rs *conf.RuleGroup) {
@@ -380,19 +382,26 @@ func (f *fixture) expectUpdateRuleGroupsAction(rs *conf.RuleGroup) {
 	}, rs.Namespace, rs))
 }
 
+func (f *fixture) expectUpdateRuleGroupsStatusAction(rs *conf.RuleGroup) {
+	f.actions = append(f.actions, core.NewUpdateSubresourceAction(schema.GroupVersionResource{
+		Resource: "rulegroups",
+		Group:    conf.SchemeGroupVersion.Group,
+		Version:  conf.SchemeGroupVersion.Version,
+	}, "status", rs.Namespace, rs))
+}
+
 func (f *fixture) expectCreateConfigMapAction(cm *corev1.ConfigMap) {
 	f.kubeactions = append(f.kubeactions, core.NewCreateAction(schema.GroupVersionResource{
 		Resource: "configmaps",
 		Group:    "",
-		Version:  "v1",
-	}, cm.Namespace, cm))
+		Version:  ""}, cm.Namespace, cm))
 }
 
 func (f *fixture) expectCreateSecretAction(s *corev1.Secret) {
 	f.kubeactions = append(f.kubeactions, core.NewCreateAction(schema.GroupVersionResource{
 		Resource: "secrets",
 		Group:    "",
-		Version:  "v1",
+		Version:  "",
 	}, s.Namespace, s))
 }
 
@@ -400,7 +409,7 @@ func (f *fixture) expectUpdateConfigMapAction(cm *corev1.ConfigMap) {
 	f.kubeactions = append(f.kubeactions, core.NewUpdateAction(schema.GroupVersionResource{
 		Resource: "configmaps",
 		Group:    "",
-		Version:  "v1",
+		Version:  "",
 	}, cm.Namespace, cm))
 }
 
@@ -408,7 +417,7 @@ func (f *fixture) expectUpdateSecretAction(s *corev1.Secret) {
 	f.kubeactions = append(f.kubeactions, core.NewUpdateAction(schema.GroupVersionResource{
 		Resource: "secrets",
 		Group:    "",
-		Version:  "v1",
+		Version:  "",
 	}, s.Namespace, s))
 }
 
@@ -440,15 +449,64 @@ func getKey(obj interface{}, t *testing.T) string {
 func TestCreatesRuleGroup(t *testing.T) {
 	f := newFixture(t)
 	rs := newRuleGroup("test", testGroup)
+	rs.Status.RecordingRuleCount = 2
+
+	f.ruleGroupLister = append(f.ruleGroupLister, rs)
+	f.objects = append(f.objects, rs)
+	//f.kubeobjects = append(f.kubeobjects, cm)
+
+	ucm := newConfigMap(
+		"default",
+		"prom-config-controller",
+		"prom-config-controller.yaml",
+		testConfigMap)
+	cm := ucm.DeepCopy()
+	cm.Data = map[string]string{}
+
+	f.expectCreateConfigMapAction(cm)
+	f.expectUpdateConfigMapAction(ucm)
+	//f.expectUpdateRuleGroupsStatusAction(nrs)
+
+	f.run(rs, t)
+}
+
+func TestDoNothing(t *testing.T) {
+	f := newFixture(t)
+	rs := newRuleGroup("test", testGroup)
+	rs.Status.RecordingRuleCount = 2
+
 	cm := newConfigMap(
 		"default",
 		"prom-config-controller",
 		"prom-config-controller.yaml",
 		testConfigMap)
+
 	f.ruleGroupLister = append(f.ruleGroupLister, rs)
 	f.objects = append(f.objects, rs)
 	f.kubeobjects = append(f.kubeobjects, cm)
-	f.expectUpdateConfigMapAction(cm)
+
+	f.run(rs, t)
+}
+
+func TestUpdateRuleGroup(t *testing.T) {
+	f := newFixture(t)
+	rs := newRuleGroup("test", testGroup)
+	rs.Status.RecordingRuleCount = 2
+
+	ucm := newConfigMap(
+		"default",
+		"prom-config-controller",
+		"prom-config-controller.yaml",
+		testConfigMap)
+	cm := ucm.DeepCopy()
+	cm.Data = map[string]string{}
+
+	f.ruleGroupLister = append(f.ruleGroupLister, rs)
+	f.objects = append(f.objects, rs)
+	f.kubeobjects = append(f.kubeobjects, cm)
+
+	f.expectUpdateConfigMapAction(ucm)
+	//f.expectUpdateRuleGroupsStatusAction(nrs)
 
 	f.run(rs, t)
 }
