@@ -312,11 +312,13 @@ func main() {
 		s.Shutdown(context.Background())
 	}()
 
-	g := &errgroup.Group{}
+	g, ctx := errgroup.WithContext(context.Background())
 	g.Go(func() error { return s.ListenAndServeTLS(tlsCert, tlsKey) })
 	g.Go(func() error { return controller.Run(stopCh) })
 
-	if err := g.Wait(); err != nil {
+	<-ctx.Done()
+
+	if err := ctx.Err(); err != nil && err != http.ErrServerClosed {
 		glog.Fatalf("Error running controller: %s", err.Error())
 	}
 }
