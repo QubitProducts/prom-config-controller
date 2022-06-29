@@ -186,7 +186,6 @@ func (c *Controller) Run(stopCh <-chan struct{}) error {
 	glog.Info("self registering validation webhook")
 	if err := c.selfRegistration(); err != nil {
 		glog.Errorf("registering webhook failed, %v", err)
-		return errors.Wrap(err, "registering webhook failed")
 	}
 
 	glog.Info("Waiting for informer caches to sync")
